@@ -10,11 +10,13 @@
 
     const handler = Plaid.create({
         token: await fetchLinkToken(),
-        onSuccess: () => {
+        onSuccess: (_, metadata) => {
+            console.log(metadata);
             console.log('Plaid Deposit Switch successful!');
         },
-        onEvent: (metadata) => {
+        onEvent: (eventName, metadata) => {
             console.log(metadata);
+            console.log(eventName);
         },
         onExit: (error, metadata) => {
             console.log(error, metadata);
