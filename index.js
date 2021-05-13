@@ -4,8 +4,10 @@ const express = require('express');
 const app = express();
 
 const path = require('path');
+const util = require('util');
 
 const PORT = process.env.PORT || 3000;
+let DEPOSIT_SWITCH_ID;
 
 const plaid = require('plaid');
 const plaidClient = new plaid.Client({
@@ -44,6 +46,8 @@ app.get('/create-link-token', async (req, res) => {
     const { target_account: targetAccount, target_user: targetUser } = userData;
     const { deposit_switch_id: depositSwitchId } = await plaidClient.createDepositSwitchAlt(targetAccount, targetUser);
 
+    DEPOSIT_SWITCH_ID = depositSwitchId;
+
     const { link_token: linkToken } = await plaidClient.createLinkToken({
         user: {
             client_user_id: 'some-cool-user-id',
@@ -58,6 +62,13 @@ app.get('/create-link-token', async (req, res) => {
     });
 
     res.json({ linkToken });
+});
+
+app.get('/get-deposit-switch', async (req, res) => {
+    const depositSwitchResponse = await plaidClient.getDepositSwitch(DEPOSIT_SWITCH_ID);
+    console.log(util.inspect(depositSwitchResponse, false, null, true));
+
+    res.sendStatus(200);
 });
 
 app.listen(PORT, () => {
